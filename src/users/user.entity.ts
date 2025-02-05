@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
 import UserRole from './userRole';
+import { Trip } from '../trips/trip.entity';
 
 @Entity('users')
 export class User {
@@ -30,4 +31,6 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
 
+  @OneToMany(() => Trip, trip => trip.user)
+  trips: Trip[];
 }

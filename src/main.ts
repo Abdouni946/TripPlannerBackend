@@ -1,14 +1,36 @@
-import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Enable CORS
+  app.enableCors();
   
-  app.use(express.json({ limit: '50mb' })); // Augmenter la limite pour JSON
-  app.use(express.urlencoded({ limit: '50mb', extended: true })); // Augmenter la limite pour form-data
+  // Configure Express
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
+  
+  // Enable validation
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
 
-  await app.listen( 3000,'192.168.233.154');
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Trip Planner API')
+    .setDescription('The Trip Planner API description')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
+  await app.listen(3000);
 }
 bootstrap();
